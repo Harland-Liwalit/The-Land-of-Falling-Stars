@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桌游角色 - 夜影·莉莉丝</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 基础设置 - 移动优先 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #87CEEB, #E0F7FA); /* 天蓝色渐变 */
+            color: #333;
+            line-height: 1.6;
+            padding-bottom: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* 角色立绘区域 - 优化 */
+        .character-art {
+            height: 45vh; /* 占据屏幕一半高度 */
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .character-art img {
+            /* 关键优化：确保图片完整显示 */
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            object-position: center center;
+            width: auto;
+            height: auto;
+            display: block;
+        }
+        
+        /* 主要内容容器 */
+        .container {
+            max-width: 100%;
+            padding: 0 15px;
+            margin-top: -40px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* 角色信息 */
+        .character-info {
+            text-align: center;
+            margin: 0 0 25px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .character-info h1 {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .faction {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            color: #34495e;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .faction i {
+            color: #8e44ad;
+            font-size: 1.4rem;
+        }
+        
+        /* 经历部分 */
+        .history {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .history h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2980b9;
+            font-size: 1.8rem;
+            padding-bottom: 10px;
+            position: relative;
+        }
+        
+        .history h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, #3498db, #9b59b6);
+            border-radius: 3px;
+        }
+        
+        .story {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: justify;
+            background: rgba(236, 240, 241, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .story p {
+            margin-bottom: 15px;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #a1c4fd, #c2e9fb);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        /* 道具部分 - 单卡片优化 */
+        .items {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .items h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2980b9;
+            font-size: 1.8rem;
+            padding-bottom: 10px;
+            position: relative;
+        }
+        
+        .items h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, #3498db, #9b59b6);
+            border-radius: 3px;
+        }
+        
+        .item-single {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .item-card {
+            text-align: center;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .item-card img {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #3498db;
+            background: #f8f9fa;
+            padding: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .item-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .item-card p {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+        
+        .item-card .rarity {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 15px;
+            background: linear-gradient(to right, #f39c12, #e74c3c);
+            color: white;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .item-card::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 10px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 50%;
+            filter: blur(5px);
+            z-index: -1;
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            margin-top: 15px;
+            color: #34495e;
+            font-size: 0.9rem;
+            padding: 0 15px;
+        }
+        
+        .game-logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #8e44ad;
+            margin-bottom: 5px;
+        }
+        
+        /* 响应式调整 - 平板及以上 */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 750px;
+                margin: -40px auto 0;
+            }
+            
+            .character-info h1 {
+                font-size: 2.8rem;
+            }
+            
+            .story {
+                padding: 25px;
+                font-size: 1.15rem;
+            }
+            
+            .item-card {
+                padding: 35px;
+            }
+        }
+        
+        /* 小屏幕手机调整 */
+        @media (max-width: 380px) {
+            .character-info h1 {
+                font-size: 1.8rem;
+            }
+            
+            .history h2,
+            .items h2 {
+                font-size: 1.5rem;
+            }
+            
+            .story {
+                padding: 15px;
+                font-size: 1rem;
+            }
+            
+            .item-card img {
+                width: 120px;
+                height: 120px;
+            }
+        }
+        
+        /* 装饰元素 */
+        .decoration {
+            position: absolute;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .decoration.circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 8px solid #3498db;
+            top: 20%;
+            right: 10%;
+        }
+        
+        .decoration.triangle {
+            width: 0;
+            height: 0;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 100px solid #9b59b6;
+            bottom: 10%;
+            left: 5%;
+            transform: rotate(25deg);
+        }
+        
+        /* 图片加载提示 */
+        .image-tips {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 500px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+        }
+        
+        .image-tips h3 {
+            color: #2980b9;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .image-tips ul {
+            padding-left: 20px;
+        }
+        
+        .image-tips li {
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <!-- 装饰元素 -->
+    <div class="decoration circle"></div>
+    <div class="decoration triangle"></div>
+    
+    <!-- 顶部角色立绘 -->
+    <div class="character-art">
+        <!-- 本地图片路径示例 -->
+        <img src="suwen.png" alt="夜影·莉莉丝立绘">
+    </div>
+    
+    <!-- 主体内容 -->
+    <div class="container">
+        <!-- 角色基本信息 -->
+        <div class="character-info">
+            <h1>夜影·莉莉丝</h1>
+            <div class="faction">
+                <i class="fas fa-skull"></i>
+                <span>暗影议会</span>
+            </div>
+            <p>传奇刺客 | 暗影操控者</p>
+        </div>
+        <!-- 角色经历 -->
+        <section class="history">
+            <h2><i class="fas fa-scroll"></i> 人物背景</h2>
+            <div class="story">
+                <p>夜影·莉莉丝出生于被遗忘的<span class="highlight">暗影山谷</span>，一个终年被魔法迷雾笼罩的神秘之地。作为暗影血脉的最后传人，她天生拥有操控阴影的能力，能在黑暗中自由穿梭而不留痕迹。</p>
+                
+                <p>在她十五岁那年，<span class="highlight">暗影议会</span>的长老发现了她的天赋，将她带回议会接受严苛训练。经过五年非人的磨练，莉莉丝掌握了所有暗杀技巧和古老咒语，成为议会最致命的武器。</p>
+                
+                <p>纪元223年，她执行了著名的<span class="highlight">"新月行动"</span>，单枪匹马潜入北方军阀的堡垒，在众目睽睽之下取走目标首级后消失无踪。此役让她获得<span class="highlight">"暗影之刃"</span>的称号，并晋升为议会首席刺客。</p>
+                
+                <p>如今，莉莉丝游走于光明与黑暗的边缘，执行着议会最危险的任务。有人说她是无情的杀手，也有人说她是被命运诅咒的守护者。唯一确定的是，当她的身影融入阴影时，死亡也随之降临。</p>
+            </div>
+        </section>
+        
+        <!-- 专属道具 - 单卡片设计 -->
+        <section class="items">
+            <h2><i class="fas fa-gem"></i> 专属道具</h2>
+            <div class="item-single">
+                <div class="item-card">
+                    <!-- 本地图片路径示例 -->
+                    <img src="https://cdn-icons-png.flaticon.com/512/2910/2910794.png" alt="幽影匕首">
+                    <h3>幽影匕首</h3>
+                    <p>"影牙" - 这把被诅咒的匕首诞生于暗影议会的古老熔炉，刀身由月影石锻造，刀刃上流动着永不停息的暗影能量。它能无声无息地穿透最坚固的盔甲，并在伤口处留下无法愈合的暗影腐蚀。传说持有者能通过它吸收受害者的生命力，延长自己的寿命。</p>
+                    <span class="rarity">传奇物品</span>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- 页脚 -->
+    <footer>
+        <div class="game-logo">暗影纪元</div>
+        <p>桌游角色档案 © 2025 | 本内容纯属虚构</p>
+    </footer>
+    
+    <script>
+        // 简单的交互效果
+        document.querySelector('.item-card').addEventListener('click', function() {
+            this.classList.toggle('active');
+        });
+        
+        // 页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.body.style.opacity = 1;
+            }, 300);
+        });
+    </script>
+</body>
+</html>
